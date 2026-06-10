@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phishing Awareness System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script>
+        function showForm(formId) {
+            document.getElementById("choice").style.display = "none";
+            document.getElementById("adminForm").style.display = "none";
+            document.getElementById("employeeForm").style.display = "none";
+            document.getElementById("registerForm").style.display = "none";
+            document.getElementById(formId).style.display = "block";
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- CHOICE BOX -->
+    <div id="choice">
+        <h2>Phishing Awareness System</h2>
+        <p>Select Login Type</p>
+
+        <button onclick="showForm('adminForm')">Login as Admin</button>
+        <button onclick="showForm('employeeForm')">Login as Employee</button>
+    </div>
+
+    <!-- ADMIN LOGIN -->
+    <div id="adminForm" style="display:none;">
+        <h2>Admin Login</h2>
+
+        <form method="post" action="/admin-login">
+            <input type="text" name="admin_email" placeholder="Admin Email" required>
+            <input type="password" name="admin_password" placeholder="Admin Password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="link" onclick="showForm('choice')">← Back</p>
+    </div>
+
+    <!-- EMPLOYEE LOGIN -->
+    <div id="employeeForm" style="display:none;">
+        <h2>Employee Login</h2>
+
+        <form method="post" action="/employee-login">
+            <input type="text" name="employee_email" placeholder="Employee ID / Email" required>
+            <input type="password" name="employee_password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="link" onclick="showForm('registerForm')">New Employee? Register</p>
+        <p class="link" onclick="showForm('choice')">← Back</p>
+    </div>
+
+    <!-- EMPLOYEE REGISTRATION -->
+    <div id="registerForm" style="display:none;">
+        <h3>Employee Registration</h3>
+            <form action="/register" method="POST">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+
+
+        <p class="link" onclick="showForm('employeeForm')">← Back to Login</p>
+    </div>
+
+</div>
+
+</body>
+
+<script>
+    // Check if registration just happened
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === '1') {
+            showForm('employeeForm'); // automatically show Employee Login
+            alert('Registration successful! Please login.');
+        }
+    }
+</script>
+
+</html>

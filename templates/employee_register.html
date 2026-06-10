@@ -1,0 +1,25 @@
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        # Get data from form
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']  # plain password
+
+        # Check if email already exists
+        cursor.execute("SELECT * FROM employees WHERE email=%s", (email,))
+        existing = cursor.fetchone()
+        if existing:
+            return "Employee with this email already exists!"
+
+        # Insert into database
+        cursor.execute(
+            "INSERT INTO employees (name, email, password) VALUES (%s, %s, %s)",
+            (name, email, password)
+        )
+        db.commit()
+
+        return redirect('/')  # redirect to index or login page
+
+    # If GET request, show registration page
+    return render_template('employee_register.html')

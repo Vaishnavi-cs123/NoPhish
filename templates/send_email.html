@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Campaign</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      background: #f3f4f6;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    /* Sidebar (same as other pages) */
+    .sidebar {
+      width: 240px;
+      background: #111827;
+      color: #fff;
+      padding: 20px;
+      position: fixed;
+      height: 100vh;
+    }
+    .sidebar h4 {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .sidebar a {
+      display: block;
+      color: #d1d5db;
+      text-decoration: none;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: #1f2937;
+      color: #fff;
+    }
+
+    /* Main (same spacing style) */
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+      width: calc(100% - 240px);
+    }
+
+    .card-soft {
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .template-card { cursor: pointer; border: 2px solid transparent; }
+    .template-card.selected { border-color: #dc3545; background: #fff5f5; }
+
+    .preview {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fafafa;
+      padding: 14px;
+      min-height: 200px;
+    }
+
+    /* Stepper */
+    .stepper { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 10px 0 18px; }
+    .step { flex: 1; text-align: center; position: relative; }
+    .step .dot {
+      width: 34px; height: 34px; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #e5e7eb; color: #111827; font-weight: 700;
+    }
+    .step.active .dot { background: #dc3545; color: #fff; }
+    .step.done .dot { background: #16a34a; color: #fff; }
+    .step .label { margin-top: 8px; color: #6b7280; font-size: 14px; }
+    .step.active .label { color: #111827; font-weight: 600; }
+    .line { height: 2px; background: #e5e7eb; flex: 1; margin-top: -22px; }
+
+    /* Hide/Show steps */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    /* Review box */
+    .review-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fff;
+      padding: 16px;
+    }
+    .review-kv { display: flex; gap: 18px; flex-wrap: wrap; }
+    .review-kv .item { min-width: 220px; }
+    .muted { color: #6b7280; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4>Phishing Tool</h4>
+
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('campaigns') }}">Campaigns</a>
+    <a class="active" href="{{ url_for('send_email') }}">Create Email</a>
+    <a href="{{ url_for('templates_page') }}">Templates</a>
+    <a href="{{ url_for('records_activity') }}">Records</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">Create Phishing Email</h2>
+      <a class="btn btn-outline-secondary" href="{{ url_for('admin_dashboard') }}">← Back to Dashboard</a>
+    </div>
+
+    <!-- Stepper -->
+    <div class="card-soft p-3 mb-3">
+      <div class="stepper">
+        <div class="step active" id="step1Head">
+          <div class="dot">1</div>
+          <div class="label">Choose Template</div>
+        </div>
+        <div class="line"></div>
+        <div class="step" id="step2Head">
+          <div class="dot">2</div>
+          <div class="label">Recipient Details</div>
+        </div>
+        <div class="line"></div>
+        <div class="step" id="step3Head">
+          <div class="dot">3</div>
+          <div class="label">Review &amp; Send</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="card-soft p-4" id="campaignForm">
+
+      <!-- hidden -->
+      <input type="hidden" name="template_id" id="template_id" required>
+      <input type="hidden" name="template_title" id="template_title">
+      <input type="hidden" name="template_subject" id="template_subject">
+      <input type="hidden" name="template_body" id="template_body">
+
+      <!-- ===================== STEP 1 ===================== -->
+      <div class="step-panel active" id="step1Panel">
+        <h5 class="mb-3">Select Email Template</h5>
+
+        <div class="row g-3">
+          {% for t in templates %}
+          <div class="col-md-4">
+            <div class="card-soft p-3 template-card"
+                 data-id="{{ t.id }}"
+                 data-title="{{ t.title|e }}"
+                 data-subject="{{ t.subject|e }}"
+                 data-body="{{ t.body|e }}"
+                 onclick="pickTemplate(this)">
+              <div class="fw-bold">{{ t.title }}</div>
+              <div class="text-muted small">{{ t.category }} • ID {{ t.id }}</div>
+              <div class="small mt-2 text-muted">{{ t.subject }}</div>
+              <div class="mt-2"><span class="badge text-bg-danger">Use</span></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-3">
+          <div class="fw-semibold">Preview</div>
+          <div class="preview mt-2" id="previewBox">Select a template to preview…</div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <button type="button" class="btn btn-danger px-4" onclick="nextFromStep1()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================== STEP 2 ===================== -->
+      <div class="step-panel" id="step2Panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Recipient Details</h5>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Campaign Name</label>
+            <input class="form-control" name="campaign_name" id="campaign_name"
+                   placeholder="e.g., HR Survey Awareness Test" required>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Sender Name</label>
+            <input class="form-control" name="sender_name" id="sender_name"
+                   placeholder="e.g., HR Team" required>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Sender Email</label>
+            <input class="form-control" name="sender_email" id="sender_email"
+                   placeholder="e.g., hr@company.com" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Subject Line</label>
+            <input class="form-control" name="subject_line" id="subject_line"
+                   placeholder="Auto-filled from selected template (editable)" required>
+            <div class="muted small mt-1">This will be auto-filled when you choose a template.</div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="form-label">Recipients (emails)</label>
+          <textarea class="form-control" name="recipients" id="recipients" rows="5"
+                    placeholder="a@company.com, b@company.com OR one per line" required></textarea>
+        </div>
+
+        <div class="alert alert-warning mt-3 mb-0">
+          Training simulation only. Passwords are NOT stored. We only record “password entered: YES/NO”.
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(1)">
+            ← Back
+          </button>
+          <button type="button" class="btn btn-danger px-4" onclick="nextFromStep2()">
+            Next →
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================== STEP 3 ===================== -->
+      <div class="step-panel" id="step3Panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Review &amp; Send</h5>
+          <span class="badge text-bg-warning">Simulation</span>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="review-box">
+              <div class="fw-semibold mb-3">Campaign Details</div>
+
+              <div class="review-kv">
+                <div class="item">
+                  <div class="muted small">Campaign Name</div>
+                  <div id="rv_campaign_name" class="fw-semibold">—</div>
+                </div>
+                <div class="item">
+                  <div class="muted small">Sender Name</div>
+                  <div id="rv_sender_name" class="fw-semibold">—</div>
+                </div>
+                <div class="item">
+                  <div class="muted small">Sender Email</div>
+                  <div id="rv_sender_email" class="fw-semibold">—</div>
+                </div>
+                <div class="item">
+                  <div class="muted small">Subject</div>
+                  <div id="rv_subject_line" class="fw-semibold">—</div>
+                </div>
+                <div class="item">
+                  <div class="muted small">Recipients</div>
+                  <div id="rv_recipients" class="fw-semibold">—</div>
+                </div>
+                <div class="item">
+                  <div class="muted small">Template</div>
+                  <div id="rv_template" class="fw-semibold">—</div>
+                </div>
+              </div>
+
+              <div class="alert alert-warning mt-3 mb-0">
+                ⚠️ This is a phishing simulation for educational purposes only.
+                All data collected will be used for security awareness training.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="review-box">
+              <div class="fw-semibold mb-2">Email Preview</div>
+              <div class="preview" id="rv_preview">
+                Select a template to preview…
+              </div>
+              <div class="muted small mt-2">
+                Link placeholder will be inserted automatically later.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" onclick="goStep(2)">
+            ← Back
+          </button>
+
+          <button class="btn btn-danger px-5">
+            Send Campaign
+          </button>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+
+<script>
+  function setStepHead(step){
+    const s1 = document.getElementById("step1Head");
+    const s2 = document.getElementById("step2Head");
+    const s3 = document.getElementById("step3Head");
+
+    [s1,s2,s3].forEach(x => x.classList.remove("active","done"));
+
+    if(step === 1){
+      s1.classList.add("active");
+    }
+    if(step === 2){
+      s1.classList.add("done");
+      s2.classList.add("active");
+    }
+    if(step === 3){
+      s1.classList.add("done");
+      s2.classList.add("done");
+      s3.classList.add("active");
+    }
+  }
+
+  function goStep(step){
+    document.getElementById("step1Panel").classList.remove("active");
+    document.getElementById("step2Panel").classList.remove("active");
+    document.getElementById("step3Panel").classList.remove("active");
+
+    if(step === 1) document.getElementById("step1Panel").classList.add("active");
+    if(step === 2) document.getElementById("step2Panel").classList.add("active");
+    if(step === 3) document.getElementById("step3Panel").classList.add("active");
+
+    setStepHead(step);
+  }
+
+  function pickTemplate(el){
+    document.querySelectorAll(".template-card").forEach(x=>x.classList.remove("selected"));
+    el.classList.add("selected");
+
+    document.getElementById("template_id").value = el.dataset.id;
+
+    const title = el.dataset.title;
+    const subject = el.dataset.subject;
+    const body = el.dataset.body;
+
+    document.getElementById("template_title").value = title;
+    document.getElementById("template_subject").value = subject;
+    document.getElementById("template_body").value = body;
+
+    const subjInput = document.getElementById("subject_line");
+    if(subjInput) subjInput.value = subject;
+
+    document.getElementById("previewBox").innerHTML =
+      "<b>"+title+"</b><br><span class='text-muted'>"+subject+"</span><hr>"+body+
+      "<hr><small class='text-muted'>Link placeholder will be inserted automatically later.</small>";
+  }
+
+  function nextFromStep1(){
+    const tid = document.getElementById("template_id").value;
+    if(!tid){
+      alert("Please select a template first.");
+      return;
+    }
+    goStep(2);
+  }
+
+  function normalizeRecipients(text){
+    const parts = (text || "")
+      .split(/[\n,]+/g)
+      .map(x => x.trim())
+      .filter(Boolean);
+    return parts;
+  }
+
+  function fillReview(){
+    const campaignName = document.getElementById("campaign_name").value.trim();
+    const senderName = document.getElementById("sender_name").value.trim();
+    const senderEmail = document.getElementById("sender_email").value.trim();
+    const subjectLine = document.getElementById("subject_line").value.trim();
+    const recipientsRaw = document.getElementById("recipients").value;
+
+    const recips = normalizeRecipients(recipientsRaw);
+    const tTitle = document.getElementById("template_title").value;
+    const tSubj  = document.getElementById("template_subject").value;
+    const tBody  = document.getElementById("template_body").value;
+
+    document.getElementById("rv_campaign_name").innerText = campaignName || "—";
+    document.getElementById("rv_sender_name").innerText = senderName || "—";
+    document.getElementById("rv_sender_email").innerText = senderEmail || "—";
+    document.getElementById("rv_subject_line").innerText = subjectLine || "—";
+    document.getElementById("rv_recipients").innerText = recips.length + " email address(es)";
+    document.getElementById("rv_template").innerText = tTitle ? (tTitle + " (" + (tSubj || "") + ")") : "—";
+
+    document.getElementById("rv_preview").innerHTML =
+      "<b>"+(tTitle || "Template")+"</b><br><span class='text-muted'>"+(subjectLine || tSubj || "")+"</span><hr>"+(tBody || "")+
+      "<hr><small class='text-muted'>Link placeholder will be inserted automatically later.</small>";
+  }
+
+  function nextFromStep2(){
+    const form = document.getElementById("campaignForm");
+    if(!form.checkValidity()){
+      form.reportValidity();
+      return;
+    }
+    fillReview();
+    goStep(3);
+  }
+
+  {% if selected_template %}
+  window.onload = function(){
+    const cards = document.querySelectorAll(".template-card");
+    cards.forEach(c=>{
+      if(c.dataset.id == "{{ selected_template.id }}"){
+        pickTemplate(c);
+      }
+    });
+  }
+  {% endif %}
+</script>
+
+</body>
+</html>

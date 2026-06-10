@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="nav">
+    <a href="/admin">Dashboard</a>
+    <a href="/">Logout</a>
+</div>
+
+<div class="container">
+    <h2>Employee Email Check Records</h2>
+
+    <table>
+        <tr>
+            <th>Employee</th>
+            <th>Source</th>
+            <th>System Result</th>
+            <th>Employee Decision</th>
+            <th>Date</th>
+        </tr>
+
+        {% for r in records %}
+        <tr>
+            <td>{{ r.employee }}</td>
+            <td>{{ r.source }}</td>
+            <td>{{ r.result }}</td>
+            <td>{{ r.decision }}</td>
+            <td>{{ r.date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>

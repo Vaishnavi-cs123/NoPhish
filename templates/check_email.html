@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Email</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="nav">
+    <a href="/employee">Dashboard</a>
+    <a href="/">Logout</a>
+</div>
+
+<div class="container">
+    <h2>Email Spam Checker</h2>
+
+    <form method="post">
+        <select name="source">
+            <option>Admin Demo Email</option>
+            <option>External / Random Email</option>
+        </select>
+
+        <textarea name="content" placeholder="Paste email content" required></textarea>
+        <input type="text" name="url" placeholder="Paste URL (optional)">
+
+        <button type="submit">Check Spam</button>
+    </form>
+
+    {% if result %}
+        <h3>Result: {{ result }}</h3>
+    {% endif %}
+</div>
+
+</body>
+</html>

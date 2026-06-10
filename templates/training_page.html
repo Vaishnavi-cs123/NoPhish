@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verification</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body{background:#f3f4f6;font-family:"Segoe UI",sans-serif}
+    .wrap{max-width:980px;margin:40px auto;padding:0 14px}
+    .card-soft{border-radius:14px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 4px 10px rgba(0,0,0,.05)}
+    .muted{color:#6b7280}
+    .danger-box{background:#fff5f5;border:1px solid #fecaca;border-left:6px solid #dc3545;border-radius:12px;padding:14px}
+    .tip{background:#e0f2fe;border-left:6px solid #0284c7;border-radius:12px;padding:14px}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="card-soft p-4">
+    <h3 class="mb-2">Verification Portal</h3>
+    <p class="muted mb-3">Please wait while we load your verification step…</p>
+
+    <!-- Fake error moment (for awareness) -->
+    <div class="danger-box mb-4">
+      <div class="fw-bold">Something went wrong</div>
+      <div class="muted">
+        We couldn’t complete the verification due to a security mismatch.
+        This is a common trick used in phishing emails to push employees into panic actions.
+      </div>
+    </div>
+
+    <!-- SAFE training content (no credentials) -->
+    <div class="tip mb-4">
+      <div class="fw-bold">Quick Awareness Check</div>
+      <ul class="mb-0">
+        <li>Always verify the sender address carefully (not just the name).</li>
+        <li>Don’t rush because of “urgent” or “account will be locked” messages.</li>
+        <li>Don’t enter passwords from email links — open the official portal manually.</li>
+        <li>Report suspicious emails to IT/Security.</li>
+      </ul>
+    </div>
+
+    <form method="POST" action="/l/{{ token }}/complete">
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="ack" required>
+        <label class="form-check-label" for="ack">
+          I understand that this was a simulated phishing awareness test.
+        </label>
+      </div>
+
+      <button class="btn btn-danger w-100">
+        Finish Training
+      </button>
+    </form>
+
+    <div class="alert alert-warning mt-4 mb-0">
+      <b>Important:</b> No passwords are collected or stored in this training simulation.
+    </div>
+  </div>
+
+  <div class="text-center mt-3 muted small">
+    © Company • Internal Awareness Program
+  </div>
+
+</div>
+
+</body>
+</html>
